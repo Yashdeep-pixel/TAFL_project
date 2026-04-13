@@ -204,13 +204,22 @@ function analyseString(pumped, langKey, inLang, validPart) {
  * Parses math string formats like "a^n b^n c^m" into generators and acceptors.
  * Uses Regular Expressions to capture blocks, then verifies count dependencies.
  */
-function parseLanguageNotation(notationString) {
-  let str = notationString.replace(/\s+/g, '');
-  if (!str) return null;
+let lastParsedExpr = null;
+let lastParsedResult = null;
 
-  const parts = str.split('|');
-  const expr  = parts[0];
-  const conds = parts[1] || '';
+function parseLanguageNotation(expr) {
+  expr = expr.replace(/\s+/g, '');
+  if (!expr) return { error: "Empty expression" };
+  
+  if (lastParsedExpr === expr) return lastParsedResult;
+
+  const parts = expr.split('|');
+  const formula = parts[0];
+  const conditionsStr = parts[1] || '';
+
+  // 1. Parse conditions into constraints
+  const constraintMap = {};
+  const condList = conditionsStr.split(',');
 
   // ── Parse exponent token into { coeff, varName } ─────────────────
   // Handles: n, m, 3n, 2m, n2 (coeff may come before or after variable)
@@ -375,7 +384,9 @@ function parseLanguageNotation(notationString) {
   };
 
   // Expose varMins so callers can inspect per-variable floors
-  return { generate, accepts, desc, varsObj, varsNeedingSliders, varMins, minForVar };
+  lastParsedExpr = expr;
+  lastParsedResult = { generate, accepts, desc, varsObj, varsNeedingSliders, varMins, minForVar };
+  return lastParsedResult;
 }
 
 const LANGUAGES = {
@@ -932,34 +943,43 @@ function updateResults({ constraints, pumped, inLang }) {
    §9  MAIN UPDATE LOOP
    ════════════════════════════════════════════════════════════ */
 
+let updatePending = false;
+
 function update() {
-  // Check if we need to build dynamic sliders BEFORE string generation phase
-  let parsed = null;
-  if (state.langKey === 'custom') {
-      parsed = parseLanguageNotation(state.customMathVal);
-  }
-  
-  const newSignature = JSON.stringify(parsed && !parsed.error ? parsed.varsNeedingSliders : null);
-  if (state.currentDynamicSignature !== newSignature) {
-      state.currentDynamicSignature = newSignature;
-      renderDynamicSliders(parsed && !parsed.error ? parsed.varsNeedingSliders : null);
-  }
+  if (updatePending) return;
+  updatePending = true;
 
-  const derived = deriveValues();
+  requestAnimationFrame(() => {
+    updatePending = false;
+    
+    // Check if we need to build dynamic sliders BEFORE string generation phase
+    let parsed = null;
+    if (state.langKey === 'custom') {
+        parsed = parseLanguageNotation(state.customMathVal);
+    }
+    
+    const newSignature = JSON.stringify(parsed && !parsed.error ? parsed.varsNeedingSliders : null);
+    if (state.currentDynamicSignature !== newSignature) {
+        state.currentDynamicSignature = newSignature;
+        renderDynamicSliders(parsed && !parsed.error ? parsed.varsNeedingSliders : null);
+    }
 
-  renderStringDisplay(state.s);
+    const derived = deriveValues();
 
-  renderPartition(state.s, state.xLen, state.yLen);
-  renderConstraintWarning(derived.constraints);
+    renderStringDisplay(state.s);
 
-  renderPumpLock(derived.constraints);
-  renderPumpedString(derived);
+    renderPartition(state.s, state.xLen, state.yLen);
+    renderConstraintWarning(derived.constraints);
 
-  renderMathExplanation(derived);
-  updateResults(derived);
+    renderPumpLock(derived.constraints);
+    renderPumpedString(derived);
 
-  // Remember i so next render knows direction
-  state.prevI = state.i;
+    renderMathExplanation(derived);
+    updateResults(derived);
+
+    // Remember i so next render knows direction
+    state.prevI = state.i;
+  });
 }
 
 
