@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pumping Lemma Explorer</title>
+  <meta name="description" content="An interactive educational tool to explore and understand the Pumping Lemma for Regular Languages." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});">
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              50:  '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="min-h-screen font-sans antialiased" style="background:#f0f4ff;color:#334155;">
+
+  <!-- ─── HEADER ─── -->
+  <header style="position:relative;overflow:hidden;background:linear-gradient(135deg,#ffffff 0%,#f5f7ff 50%,#eef2ff 100%);border-bottom:1px solid rgba(99,102,241,0.12);box-shadow:0 2px 20px rgba(99,102,241,0.08);">
+    <!-- Decorative glow accents -->
+    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 70% at 0% 0%,rgba(99,102,241,0.08) 0%,transparent 55%),radial-gradient(ellipse 40% 50% at 100% 100%,rgba(139,92,246,0.06) 0%,transparent 55%);"></div>
+    <div style="position:absolute;top:-40px;right:8%;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,0.08) 0%,transparent 70%);pointer-events:none;"></div>
+
+    <div class="max-w-5xl mx-auto px-6 py-12 relative">
+      <!-- Tag badge -->
+      <div style="display:inline-flex;align-items:center;gap:0.5rem;background:#eef2ff;border:1px solid rgba(99,102,241,0.2);border-radius:9999px;padding:0.3rem 0.9rem;margin-bottom:1.25rem;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#6366f1;display:inline-block;"></span>
+        <span style="font-size:0.7rem;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#4f46e5;">Theory of Formal Languages</span>
+      </div>
+
+      <h1 style="font-size:clamp(2rem,5vw,3.25rem);font-weight:900;letter-spacing:-0.03em;color:#0f172a;margin-bottom:1rem;line-height:1.1;">
+        Pumping Lemma
+        <span style="background:linear-gradient(90deg,#4f46e5,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"> Explorer</span>
+      </h1>
+
+      <p style="color:#475569;max-width:640px;line-height:1.75;font-size:1rem;font-weight:500;">
+        The <strong style="color:#0f172a;font-weight:800;">Pumping Lemma</strong> states that for any regular language $L$, there exists a pumping length $p$ such that every string $s \in L$ with $|s| \geq p$ can be split into $s = xyz$ where $|y| \geq 1$, $|xy| \leq p$, and $xy^i z \in L$ for all $i \geq 0$. Use this tool to explore how non-regular languages <em style="color:#4f46e5;font-style:italic;">fail</em> this condition.
+      </p>
+    </div>
+  </header>
+
+  <!-- ─── MAIN LAYOUT ─── -->
+  <main class="max-w-5xl mx-auto px-6 py-10 space-y-8">
+    
+    <div id="tourButtonContainer" class="flex justify-center md:pb-2">
+      <button id="btn-start-tour" style="background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-weight:800;font-size:1rem;padding:0.9rem 2.2rem;border-radius:1rem;box-shadow:0 8px 24px rgba(99,102,241,0.28);border:1px solid rgba(99,102,241,0.3);display:inline-flex;align-items:center;gap:1rem;letter-spacing:0.01em;cursor:pointer;transition:all 0.2s;">
+        <span style="font-size:1.5rem;">🎓</span>
+        <span>Interactive Guided Tour</span>
+      </button>
+    </div>
+
+    <!-- ── Section 1: Language & Pumping Length ── -->
+    <section class="card" id="section-setup">
+      <div class="card-header w-full flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <span class="step-badge">1</span>
+          <h2 class="card-title">Select Language &amp; Pumping Length</h2>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <!-- Language Dropdown -->
+        <div class="form-group">
+          <label class="form-label" for="languageSelect">Language $L$</label>
+          <select id="languageSelect" class="form-select">
+            <option value="0n1n">L = { 0ⁿ 1ⁿ | n ≥ 1 }</option>
+            <option value="apbp">L = { aᵖ bᵖ | p ≥ 1 }</option>
+            <option value="anbn_cn">L = { aⁿ bⁿ cⁿ | n ≥ 1 }</option>
+            <option value="palindrome">L = { wwᴿ | w ∈ {a,b}* }</option>
+            <option value="anbm">L = { aⁿ bᵐ | n, m ≥ 0 } (Regular)</option>
+            <option value="custom">⚙️ Custom Language</option>
+          </select>
+          <p class="text-xs text-slate-500 mt-1" id="langDescription"></p>
+        </div>
+
+        <!-- Pumping Length p -->
+        <div class="form-group">
+          <label class="form-label" for="pumpingLength">
+            Pumping Length $p$
+            <span class="text-slate-500 font-normal text-xs ml-1">(choose $n$ to generate string of length $\geq p$)</span>
+          </label>
+          <div class="flex items-center gap-3">
+            <input type="range" id="pumpingLengthSlider" min="1" max="10" value="3"
+              class="flex-1 accent-primary-500 cursor-pointer" />
+            <input type="number" id="pumpingLength" min="1" max="10" value="3"
+              class="form-input w-20 text-center font-mono" />
+          </div>
+        </div>
+      </div>
+
+        <!-- Custom Language Inputs (Hidden by default) -->
+        <div id="customInputs" class="hidden col-span-1 md:col-span-2 space-y-4 p-5 mt-2 bg-primary-50/50 border border-primary-200 rounded-xl">
+          <!-- Math Notation Input -->
+          <div class="form-group">
+            <label class="form-label">Custom Language (Math Notation)</label>
+            <div class="flex items-center gap-2">
+              <span class="text-slate-600 font-mono text-sm whitespace-nowrap">L = {</span>
+              <input type="text" id="customMath" value="a^n b^n | n >= 1"
+                placeholder="e.g., a^n b^m | n,m >= 0"
+                class="form-input font-mono text-sm flex-1" />
+              <span class="text-slate-600 font-mono text-sm whitespace-nowrap">}</span>
+            </div>
+            <!-- Error / parse status -->
+            <p id="customParseStatus" class="text-xs mt-1.5 text-slate-500"></p>
+          </div>
+          <!-- Helper chips for supported formats -->
+          <div>
+            <p class="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wider">Supported formats — click to try</p>
+            <div class="flex flex-wrap gap-2">
+              <button class="custom-hint-btn" data-expr="a^n b^n | n >= 1">aⁿ bⁿ | n ≥ 1</button>
+              <button class="custom-hint-btn" data-expr="a^n b^m | n,m >= 0">aⁿ bᵐ | n,m ≥ 0</button>
+              <button class="custom-hint-btn" data-expr="a^n b^n c^n | n >= 1">aⁿ bⁿ cⁿ | n ≥ 1</button>
+              <button class="custom-hint-btn" data-expr="0^n 1^n | n >= 1">0ⁿ 1ⁿ | n ≥ 1</button>
+              <button class="custom-hint-btn" data-expr="0^n 1^m | n,m >= 0">0ⁿ 1ᵐ | n,m ≥ 0</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="dynamic-sliders-container" class="mt-4 flex flex-col gap-3 w-full"></div>
+      <div id="action-step-1" class="mt-6 flex justify-end border-t border-slate-100 pt-4">
+        <button id="btn-next-2" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition-all hover:-translate-y-0.5">Next Step: View Generated String &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ── Section 2: Generated String ── -->
+    <section class="card" id="section-string" style="display: none;">
+      <div class="card-header">
+        <span class="step-badge">2</span>
+        <h2 class="card-title">Generated String $s$</h2>
+      </div>
+
+      <div class="mt-4">
+        <p class="text-sm text-slate-600 mb-3">
+          A string $s \in L$ with $|s| \geq p$ is generated for you. Each character is a cell you can examine.
+        </p>
+        <div id="stringDisplay" class="string-display flex flex-wrap gap-1 min-h-[52px] items-center p-3 rounded-xl border shadow-inner">
+          <!-- Characters will be injected here -->
+        </div>
+        <div class="flex items-center gap-6 mt-3 text-sm text-slate-600">
+          <span>Length: <code id="stringLength" class="text-primary-700 font-mono">—</code></span>
+          <span>String: <code id="stringValue" class="text-primary-700 font-mono">—</code></span>
+        </div>
+      </div>
+      <div id="action-step-2" class="mt-6 flex justify-between items-center border-t border-slate-100 pt-4">
+        <button id="btn-prev-1" class="text-slate-600 hover:text-slate-800 px-4 py-2 font-medium transition-colors">&larr; Back to Setup</button>
+        <button id="btn-next-3" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition-all hover:-translate-y-0.5">Next Step: Partition String &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ── Section 3: Partition x, y, z ── -->
+    <section class="card" id="section-partition" style="display: none;">
+      <div class="card-header">
+        <span class="step-badge">3</span>
+        <h2 class="card-title">Partition into $x$, $y$, $z$</h2>
+      </div>
+
+      <p class="text-sm text-slate-600 mt-2 mb-5">
+        Set where $x$ ends and $y$ ends. Constraints: $|y| \geq 1$ and $|xy| \leq p$.
+        <span class="text-amber-600 font-medium" id="partitionWarning"></span>
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- |x| = end of x (start of y) -->
+        <div class="form-group">
+          <label class="form-label" for="xLen">
+            Length of $x$ &nbsp;
+            <code id="xLenVal" class="text-primary-700 font-mono text-sm">0</code>
+          </label>
+          <input type="range" id="xLen" min="0" max="5" value="0" class="w-full accent-indigo-400 cursor-pointer" />
+        </div>
+
+        <!-- |y| -->
+        <div class="form-group">
+          <label class="form-label" for="yLen">
+            Length of $y$ &nbsp;
+            <code id="yLenVal" class="text-emerald-600 font-mono text-sm">1</code>
+          </label>
+          <input type="range" id="yLen" min="1" max="5" value="1" class="w-full accent-emerald-500 cursor-pointer" />
+        </div>
+      </div>
+
+      <!-- Visual partition display -->
+      <div class="mt-6">
+        <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-medium">Partition Visualisation</p>
+        <div id="partitionDisplay" class="flex flex-wrap gap-1 min-h-[52px] items-center p-3 rounded-xl border shadow-inner">
+          <!-- Coloured partition cells injected here -->
+        </div>
+
+        <div class="flex gap-4 mt-3 text-sm">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-indigo-500 inline-block"></span><span>$x$ = <code id="xValue" class="font-mono text-indigo-600">—</code></span></span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span><span>$y$ = <code id="yValue" class="font-mono text-emerald-600">—</code></span></span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-rose-500 inline-block"></span><span>$z$ = <code id="zValue" class="font-mono text-rose-600">—</code></span></span>
+        </div>
+      </div>
+      <div id="action-step-3" class="mt-6 flex justify-between items-center border-t border-slate-100 pt-4">
+        <button id="btn-prev-2" class="text-slate-600 hover:text-slate-800 px-4 py-2 font-medium transition-colors">&larr; Back to String</button>
+        <button id="btn-next-4" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition-all hover:-translate-y-0.5">Next Step: Choose Pumping Factor &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ── Section 4: Pumping Factor i ── -->
+    <section class="card" id="section-pump" style="display: none;">
+      <div class="card-header">
+        <span class="step-badge">4</span>
+        <h2 class="card-title">Choose Pumping Factor $i$</h2>
+      </div>
+
+      <p class="text-sm text-slate-600 mt-2 mb-5">
+        The pumped string is $x y^i z$. Select $i$ to see what happens when $y$ is repeated $i$ times.
+      </p>
+
+      <div class="flex items-center gap-4">
+        <label class="form-label mb-0" for="iSlider">$i$ =</label>
+        <input type="range" id="iSlider" min="0" max="6" value="0"
+          class="flex-1 accent-amber-400 cursor-pointer" />
+        <input type="number" id="iValue" min="0" max="6" value="0"
+          class="form-input w-20 text-center font-mono" />
+      </div>
+
+      <!-- Pumped string preview -->
+      <div class="mt-5">
+        <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-medium">Pumped String $xy^iz$</p>
+        <div id="pumpedDisplay" class="flex flex-wrap gap-1 min-h-[52px] items-center p-3 rounded-xl border shadow-inner">
+          <!-- Pumped string injected here -->
+        </div>
+        <div class="flex items-center gap-6 mt-3 text-sm text-slate-600">
+          <span>Length: <code id="pumpedLength" class="text-amber-600 font-mono">—</code></span>
+          <span>String: <code id="pumpedValue" class="text-amber-600 font-mono">—</code></span>
+        </div>
+      </div>
+
+      <!-- ── Math Explanation Panel ── -->
+      <div id="mathExplanation">
+        <div class="math-counts" id="mathCounts">
+          <!-- Character count chips injected by JS -->
+        </div>
+        <div class="math-verdict" id="mathVerdict"></div>
+        <div class="math-reasoning" id="mathReasoning"></div>
+      </div>
+      <div id="action-step-4" class="mt-6 flex justify-between items-center border-t border-slate-100 pt-4">
+        <button id="btn-prev-3" class="text-slate-600 hover:text-slate-800 px-4 py-2 font-medium transition-colors">&larr; Back to Partition</button>
+        <button id="btn-next-5" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition-all hover:-translate-y-0.5">Next Step: View Result &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ── Section 5: Result ── -->
+    <section class="card" id="section-result" style="display: none;">
+      <div class="card-header">
+        <span class="step-badge">5</span>
+        <h2 class="card-title">Result</h2>
+      </div>
+
+      <div id="resultPanel" class="mt-4 rounded-xl p-5 border transition-all duration-500 result-idle">
+        <div class="flex items-start gap-4">
+          <span id="resultIcon" class="text-3xl leading-none">🔬</span>
+          <div>
+            <p id="resultTitle" class="font-semibold text-lg text-slate-800">Waiting for input…</p>
+            <p id="resultExplanation" class="text-sm text-slate-600 mt-1 leading-relaxed">
+              Complete steps 1–4 above to see whether the pumped string stays in $L$.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proof summary table -->
+      <div class="mt-6 overflow-x-auto">
+        <table class="w-full text-sm text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200">
+              <th class="py-2 pr-4 text-slate-500 font-medium">Property</th>
+              <th class="py-2 text-slate-500 font-medium">Value</th>
+              <th class="py-2 pl-4 text-slate-500 font-medium">Valid?</th>
+            </tr>
+          </thead>
+          <tbody id="proofTable" class="divide-y divide-slate-200">
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+      <div id="action-step-5" class="mt-6 flex flex-wrap justify-between items-center border-t border-slate-100 pt-4 gap-4">
+        <button id="btn-prev-4" class="text-slate-500 hover:text-slate-800 px-4 py-2 font-medium transition-colors">&larr; Back to Pumping Factor</button>
+        <div class="flex gap-3">
+          <button id="btn-analyze-all" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-md transition-transform active:scale-95 flex items-center gap-2">
+            <span>🔍</span> Analyze All Partitions
+          </button>
+          <button id="btn-restart" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition-all hover:-translate-y-0.5">Start Over ↺</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Theory Note ── -->
+    <section class="card">
+      <h3 class="text-base font-semibold text-primary-700 mb-2">📖 Formal Statement</h3>
+      <p class="text-sm text-slate-700 leading-relaxed">
+        Let $L$ be a regular language. Then $\exists\, p \geq 1$ (the <em>pumping length</em>) such that $\forall s \in L$ with $|s| \geq p$, $s$ can be written as $s = xyz$ satisfying:
+      </p>
+      <ul class="mt-3 space-y-1 text-sm text-slate-700 list-none pl-2">
+        <li class="flex gap-2"><span class="text-primary-600 font-bold">①</span> $|y| \geq 1$ &nbsp;— the pumpable segment is non-empty</li>
+        <li class="flex gap-2"><span class="text-primary-600 font-bold">②</span> $|xy| \leq p$ &nbsp;— pump occurs in the first $p$ characters</li>
+        <li class="flex gap-2"><span class="text-primary-600 font-bold">③</span> $\forall i \geq 0 : xy^i z \in L$ &nbsp;— all pumped strings remain in $L$</li>
+      </ul>
+      <p class="mt-3 text-sm text-amber-600">
+        ⚠ If ANY choice of $xyz$ leads to $xy^i z \notin L$ for some $i$, the language is <strong>NOT regular</strong>.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- ─── FOOTER ─── -->
+  <footer style="border-top:1px solid #e2e8f0;text-align:center;padding:1.75rem 1rem;margin-top:1rem;color:#94a3b8;font-size:0.78rem;font-weight:500;letter-spacing:0.02em;">
+    Pumping Lemma Explorer &nbsp;·&nbsp; Theory of Automata &amp; Formal Languages &nbsp;·&nbsp; Built with ❤ using HTML, Tailwind CSS &amp; Vanilla JS
+  </footer>
+
+  <!-- ─── PROOF MODAL ─── -->
+  <div id="proofModal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4 md:p-6">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col transform scale-95 transition-transform duration-300" id="proofModalContent">
+      
+      <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
+            <span class="text-3xl drop-shadow-sm">📜</span> Ultimate Visual Proof
+          </h2>
+          <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Testing all valid permutations where $|xy| \leq p$ and $|y| \geq 1$.</p>
+        </div>
+        <button id="btn-close-proof" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center transition-colors">
+          <span class="text-xl leading-none">&times;</span>
+        </button>
+      </div>
+
+      <div class="p-0 overflow-y-auto flex-1 custom-scrollbar">
+        <table class="w-full text-sm text-left border-collapse">
+          <thead class="sticky top-0 z-10 shadow-sm">
+            <tr class="border-b border-slate-200 dark:border-slate-700">
+              <th class="py-3 px-6 font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900">Partition $(x, y, z)$</th>
+              <th class="py-3 px-6 font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 w-24 text-center">Killer $i$</th>
+              <th class="py-3 px-6 font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900">String $xy^iz$</th>
+              <th class="py-3 px-6 font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 text-center w-32">Result</th>
+            </tr>
+          </thead>
+          <tbody id="proofModalTable" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="proofVerdictPanel" class="p-5 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-b-2xl">
+        <!-- Verdict injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TOUR FLOATING WIDGET ─── -->
+  <div id="tourBanner" class="fixed top-6 right-6 md:right-10 w-[calc(100%-3rem)] md:w-[380px] bg-slate-900/95 backdrop-blur-md text-white p-6 rounded-2xl opacity-0 pointer-events-none transition-all duration-500 z-50 shadow-[0_20px_60px_rgba(15,23,42,0.4)] border border-slate-700 transform -translate-y-6">
+    <div class="flex items-start gap-4">
+      <div class="flex-shrink-0 text-4xl drop-shadow-lg translate-y-1">🎓</div>
+      <div class="flex-1 flex flex-col min-h-[110px]">
+        <h3 class="text-indigo-400 text-[0.65rem] font-bold uppercase tracking-widest mb-2" id="tourTitle">Guided Tour</h3>
+        <p class="text-sm leading-relaxed mb-6 text-slate-100 font-medium" id="tourText">Welcome to the tour.</p>
+        <div class="flex items-center justify-between mt-auto">
+          <button id="btn-tour-end" class="text-slate-400 hover:text-white text-xs font-semibold transition-colors uppercase tracking-wider">End Tour</button>
+          <button id="btn-tour-next" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg transition-transform active:scale-95 text-sm flex items-center gap-2">Next Step &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
