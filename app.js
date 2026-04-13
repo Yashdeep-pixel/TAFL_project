@@ -1238,11 +1238,11 @@ function renderProofModal(results, allFailed) {
     `;
   } else {
     verdictPanel.innerHTML = `
-      <div class="flex items-center gap-4 bg-amber-100/50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-xl shadow-inner">
-        <div class="text-4xl drop-shadow-sm">⚠️</div>
+      <div class="flex items-center gap-4 bg-emerald-100/50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-4 rounded-xl shadow-inner">
+        <div class="text-4xl drop-shadow-sm">✅</div>
         <div>
-          <h4 class="text-amber-900 dark:text-amber-400 font-extrabold text-[1.1rem] mb-1">Inconclusive or Regular</h4>
-          <p class="text-amber-800 dark:text-amber-500 text-[0.9rem] leading-relaxed">At least one partition survived the pump test up to $i=6$. The language might be regular, or you may need a larger $i$ bound to break it.</p>
+          <h4 class="text-emerald-900 dark:text-emerald-400 font-extrabold text-[1.1rem] mb-1">Inconclusive or Regular</h4>
+          <p class="text-emerald-800 dark:text-emerald-500 text-[0.9rem] leading-relaxed">At least one partition survived the pump test up to $i=6$. The language might be regular, or you may need a larger $i$ bound to break it.</p>
         </div>
       </div>
     `;
