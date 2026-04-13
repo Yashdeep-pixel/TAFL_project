@@ -1228,11 +1228,11 @@ function renderProofModal(results, allFailed) {
   const verdictPanel = DOM.proofVerdictPanel;
   if (allFailed) {
     verdictPanel.innerHTML = `
-      <div class="flex items-center gap-4 bg-emerald-100/50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-4 rounded-xl shadow-inner">
+      <div class="flex items-center gap-4 bg-rose-100/50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 p-4 rounded-xl shadow-inner">
         <div class="text-4xl drop-shadow-sm">🏆</div>
         <div>
-          <h4 class="text-emerald-900 dark:text-emerald-400 font-extrabold text-[1.1rem] mb-1">Q.E.D. Language is NON-REGULAR</h4>
-          <p class="text-emerald-800 dark:text-emerald-500 text-[0.9rem] leading-relaxed">Every single valid partition where $|xy| \\leq p$ failed the Pumping Lemma constraints. The contradiction is mathematically absolute.</p>
+          <h4 class="text-rose-900 dark:text-rose-400 font-extrabold text-[1.1rem] mb-1">Q.E.D. Language is NON-REGULAR</h4>
+          <p class="text-rose-800 dark:text-rose-500 text-[0.9rem] leading-relaxed">Every single valid partition where $|xy| \\leq p$ failed the Pumping Lemma constraints. The contradiction is mathematically absolute.</p>
         </div>
       </div>
     `;
